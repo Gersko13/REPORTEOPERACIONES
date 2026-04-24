@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte Ejecutivo - Comité de Operaciones Tasatop</title>
+    
+    <!-- Fuentes Tipográficas -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- Iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #0B72E8;
+            --primary-hover: #095bc6;
+            --bg-color: #EDEDED;
+            --text-main: #1E293B;
+            --text-muted: #64748B;
+            --white: #FFFFFF;
+            --success: #10B981;
+            --warning: #F59E0B;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* FONDO GENERAL ELIMINADO - Ahora es nativo a pantalla completa */
+        body {
+            background-color: var(--bg-color);
+            font-family: 'Open Sans', sans-serif;
+            color: var(--text-main);
+            overflow: hidden; /* Evita el scroll nativo */
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* ESTRUCTURA DEL VISOR DE PRESENTACIÓN 100% PANTALLA */
+        .presentation-wrapper {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        .slides-track {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        /* CADA SLIDE TOMA EXACTAMENTE EL 100% DE LA PANTALLA */
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            flex: 0 0 100vw; /* Asegura que el slide no se encoja nunca */
+            position: relative;
+            padding: 6vh 5vw 12vh 5vw; /* Padding dinámico basado en la pantalla */
+            display: flex;
+            justify-content: center; /* Centra el contenido horizontalmente */
+            align-items: flex-start;
+        }
+
+        /* CONTENEDOR INTERNO PARA MANTENER LA LEGIBILIDAD (No se estira infinitamente) */
+        .slide-content {
+            width: 100%;
+            max-width: 1280px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* CONTROLES DE NAVEGACIÓN FLOTANTES */
+        .controls {
+            position: absolute;
+            bottom: 4vh; /* Fijados cerca al borde inferior de la pantalla */
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 24px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background-color: var(--primary);
+            color: var(--white);
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(11, 114, 232, 0.4);
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background-color: var(--primary-hover);
+            transform: scale(1.1);
+        }
+
+        .nav-btn:disabled {
+            background-color: #CBD5E1;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .dots-container {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #CBD5E1;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+            background-color: var(--primary);
+            width: 28px;
+            border-radius: 6px;
+        }
+
+        /* HEADER ESTRUCTURAL DE LAS SLIDES */
+        .slide-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 3vh;
+            flex-shrink: 0;
+        }
+
+        .slide-title {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .slide-title i {
+            color: var(--primary);
+            font-size: 28px;
+        }
+
+        /* LOGOS */
+        .logo {
+            height: 45px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .logo-cover {
+            position: absolute;
+            top: 6vh; 
+            right: 5vw;
+            height: 60px;
+            width: auto;
+            z-index: 10;
+        }
+
+        h1, h2, h3 { font-family: 'Montserrat', sans-serif; }
+
+        /* SLIDE 1: Portada Específica */
+        .slide-cover {
+            background: linear-gradient(135deg, var(--bg-color) 60%, #ffffff 100%);
+            align-items: center; /* Centrado vertical especial para la portada */
+        }
+        
+        .slide-cover .slide-content {
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .cover-tag {
+            background-color: rgba(11, 114, 232, 0.1);
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 14px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .slide-cover h1 {
+            font-size: clamp(48px, 5vw, 72px); /* Tipografía fluida */
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            color: var(--text-main);
+        }
+
+        .slide-cover h1 span { color: var(--primary); }
+
+        .slide-cover p {
+            font-size: clamp(18px, 2vw, 24px);
+            color: var(--text-muted);
+            max-width: 600px;
+            line-height: 1.5;
+        }
+
+        .cover-accent {
+            position: absolute;
+            bottom: -15vh;
+            right: -10vw;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(11,114,232,0.08) 0%, rgba(237,237,237,0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* TABLAS Y GRIDS */
+        .table-container {
+            width: 100%;
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+            overflow: hidden;
+            height: max-content;
+            margin-bottom: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: var(--white);
+            color: var(--text-muted);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 11.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 16px 20px;
+            text-align: left;
+            border-bottom: 2px solid var(--bg-color);
+        }
+
+        td {
+            padding: 16px 20px;
+            font-size: 14px; 
+            border-bottom: 1px solid var(--bg-color);
+            vertical-align: middle;
+            color: var(--text-main);
+            line-height: 1.4;
+        }
+
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background-color: #FAFAFA; }
+        .td-highlight { font-weight: 600; color: var(--text-main); }
+
+        /* BADGES & BARRAS */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .badge.completado { background-color: rgba(16, 185, 129, 0.15); color: #047857; }
+        .badge.en-curso { background-color: rgba(11, 114, 232, 0.15); color: var(--primary); }
+        .badge.por-iniciar { background-color: rgba(100, 116, 139, 0.15); color: var(--text-muted); }
+
+        .progress-bar {
+            width: 70px;
+            height: 6px;
+            background-color: var(--bg-color);
+            border-radius: 4px;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+            overflow: hidden;
+        }
+        .progress-fill { height: 100%; background-color: var(--primary); border-radius: 4px; }
+        .progress-fill.full { background-color: var(--success); }
+        .progress-text { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+
+        /* TARJETAS (SLIDE 3) */
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            height: max-content;
+            margin-bottom: auto;
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+            border-left: 6px solid var(--primary);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .card-title { font-size: 18px; font-weight: 700; color: var(--text-main); line-height: 1.3; }
+        .card-body { flex-grow: 1; display: flex; flex-direction: column; gap: 12px; }
+        .info-block { display: flex; flex-direction: column; gap: 4px; }
+        .info-label { font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--text-muted); letter-spacing: 0.5px; }
+        .info-text { font-size: 14px; line-height: 1.4; }
+        .action-box { margin-top: auto; background-color: rgba(11, 114, 232, 0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(11, 114, 232, 0.1); }
+        .action-box .info-label { color: var(--primary); display: flex; align-items: center; gap: 6px; }
+        .action-box .info-text { font-weight: 600; margin-top: 4px; font-size: 13px; }
+        .flow-text { color: var(--text-muted); font-size: 12px; }
+        .flow-arrow { color: var(--primary); font-weight: bold; margin: 0 3px; }
+    </style>
+</head>
+<body>
+
+    <div class="presentation-wrapper">
+        
+        <!-- CONTENEDOR DE SLIDES (Track) -->
+        <div class="slides-track" id="track">
+            
+            <!-- SLIDE 1: PORTADA -->
+            <div class="slide slide-cover">
+                <img src="https://tasatop.com.pe/wp-content/uploads/elementor/thumbs/logos-17-r320c27cra86oeqcrd3z1dyn566kd6ppszxnuuh250.png" alt="Tasatop Logo" class="logo-cover">
+                <div class="cover-accent"></div>
+                
+                <div class="slide-content">
+                    <div class="cover-tag">Actualización Ejecutiva</div>
+                    <h1>Comité de <br><span>Operaciones</span></h1>
+                    <p>Reporte de avances estratégicos, soluciones en desarrollo y proyectos implementados.</p>
+                </div>
+            </div>
+
+            <!-- SLIDE 2: AVANCES -->
+            <div class="slide">
+                <div class="slide-content">
+                    <div class="slide-header">
+                        <h2 class="slide-title"><i class="fa-solid fa-chart-line"></i> Avances – Comité de Operaciones</h2>
+                        <img src="https://tasatop.com.pe/wp-content/uploads/elementor/thumbs/logos-17-r320c27cra86oeqcrd3z1dyn566kd6ppszxnuuh250.png" alt="Tasatop Logo" class="logo">
+                    </div>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th width="28%">Iniciativa / Tarea</th>
+                                    <th width="15%">Estado</th>
+                                    <th width="15%">Avance</th>
+                                    <th width="15%">Cronograma</th>
+                                    <th width="27%">Compromiso Actual</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="td-highlight">Custodia de documentos operativos</td>
+                                    <td><span class="badge en-curso">En curso</span></td>
+                                    <td>
+                                        <div class="progress-bar"><div class="progress-fill" style="width: 50%;"></div></div>
+                                        <span class="progress-text">50%</span>
+                                    </td>
+                                    <td style="color: var(--text-muted); font-size: 12px;">10 Feb - 15 May</td>
+                                    <td>Conservación y gestión documental.</td>
+                                </tr>
+                                <tr>
+                                    <td class="td-highlight">Cláusula certificados retención</td>
+                                    <td><span class="badge completado">Completado</span></td>
+                                    <td>
+                                        <div class="progress-bar"><div class="progress-fill full" style="width: 100%;"></div></div>
+                                        <span class="progress-text">100%</span>
+                                    </td>
+                                    <td style="color: var(--text-muted); font-size: 12px;">Cierre: 06 Feb</td>
+                                    <td>Se desestimó. Se ejercerá presión directa a empresas.</td>
+                                </tr>
+                                <tr>
+                                    <td class="td-highlight">Resolución Caso Jennifer Rosas</td>
+                                    <td><span class="badge completado">Completado</span></td>
+                                    <td>
+                                        <div class="progress-bar"><div class="progress-fill full" style="width: 100%;"></div></div>
+                                        <span class="progress-text">100%</span>
+                                    </td>
+                                    <td style="color: var(--text-muted); font-size: 12px;">11 Feb - 14 Feb</td>
+                                    <td>Información solicitada enviada exitosamente.</td>
+                                </tr>
+                                <tr>
+                                    <td class="td-highlight">Resolución Caso Ana L. Berrocal</td>
+                                    <td><span class="badge completado">Completado</span></td>
+                                    <td>
+                                        <div class="progress-bar"><div class="progress-fill full" style="width: 100%;"></div></div>
+                                        <span class="progress-text">100%</span>
+                                    </td>
+                                    <td style="color: var(--text-muted); font-size: 12px;">Cierre: 10 Feb</td>
+                                    <td>Acción complementada con el Caso Miguel Pacheco.</td>
+                                </tr>
+                                <tr>
+                                    <td class="td-highlight">Terreno Mochumí (Inversionistas)</td>
+                                    <td><span class="badge completado">Completado</span></td>
+                                    <td>
+                                        <div class="progress-bar"><div class="progress-fill full" style="width: 100%;"></div></div>
+                                        <span class="progress-text">100%</span>
+                                    </td>
+                                    <td style="color: var(--text-muted); font-size: 12px;">02 Feb - 08 Abr</td>
+                                    <td>Cambio de estrategia de negociación ejecutado.</td>
+                                </tr>
+                                <tr>
+                                    <td class="td-highlight">Gestión Caso Crediface</td>
+                                    <td><span class="badge en-curso">En curso</span></td>
+                                    <td>
+                                        <div class="progress-bar"><div class="progress-fill" style="width: 60%;"></div></div>
+                                        <span class="progress-text">60%</span>
+                                    </td>
+                                    <td style="color: var(--text-muted); font-size: 12px;">02 Feb - 24 Abr</td>
+                                    <td>Envío continuo de información a LH.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 3: SOLUCIONES PROPUESTAS -->
+            <div class="slide">
+                <div class="slide-content">
+                    <div class="slide-header">
+                        <h2 class="slide-title"><i class="fa-regular fa-lightbulb"></i> Soluciones Propuestas & Proyectos</h2>
+                        <img src="https://tasatop.com.pe/wp-content/uploads/elementor/thumbs/logos-17-r320c27cra86oeqcrd3z1dyn566kd6ppszxnuuh250.png" alt="Tasatop Logo" class="logo">
+                    </div>
+
+                    <div class="grid-container">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Normativa de Documentos Valorados</h3>
+                                <span class="badge por-iniciar">Por iniciar</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="info-block">
+                                    <span class="info-label">Oportunidad Identificada</span>
+                                    <span class="info-text">Falta de normatividad interna clara para la gestión documental.</span>
+                                </div>
+                                <div class="action-box">
+                                    <span class="info-label"><i class="fa-solid fa-bullseye"></i> Siguiente Paso </span>
+                                    <span class="info-text">Redacción de Política, Reglamento y Procedimiento.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Demanda M. Pacheco</h3>
+                                <span class="badge en-curso">En curso</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="info-block">
+                                    <span class="info-label">Oportunidad Identificada</span>
+                                    <span class="info-text">Uso indebido de datos personales de cartera de clientes.</span>
+                                </div>
+                                <div class="action-box">
+                                    <span class="info-label"><i class="fa-solid fa-bullseye"></i> Siguiente Paso </span>
+                                    <span class="info-text">Ejecución y seguimiento de demanda judicial en curso.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Notificación Auto. a Inversionistas</h3>
+                                <span class="badge por-iniciar">Por iniciar</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="info-block">
+                                    <span class="info-label">Oportunidad Identificada</span>
+                                    <span class="info-text">La validación documental aún depende de correos/canales externos.</span>
+                                </div>
+                                <div class="action-box">
+                                    <span class="info-label"><i class="fa-solid fa-bullseye"></i> Siguiente Paso</span>
+                                    <span class="info-text">Validar viabilidad técnica para automatizar envíos con enlace de validación.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Mejora Constructor de Contratos</h3>
+                                <span class="badge por-iniciar">Por iniciar</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="info-block">
+                                    <span class="info-label">Oportunidad Identificada</span>
+                                    <span class="info-text">La generación contractual presenta oportunidades de mejora en tiempos.</span>
+                                </div>
+                                <div class="action-box">
+                                    <span class="info-label"><i class="fa-solid fa-bullseye"></i> Siguiente Paso</span>
+                                    <span class="info-text">Definir alcance técnico para optimizar el constructor nativo de Tasatop.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 4: PROYECTOS IMPLEMENTADOS -->
+            <div class="slide">
+                <div class="slide-content">
+                    <div class="slide-header">
+                        <h2 class="slide-title"><i class="fa-solid fa-check-double"></i> Proyectos Implementados</h2>
+                        <img src="https://tasatop.com.pe/wp-content/uploads/elementor/thumbs/logos-17-r320c27cra86oeqcrd3z1dyn566kd6ppszxnuuh250.png" alt="Tasatop Logo" class="logo">
+                    </div>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th width="14%">Proyecto Finalizado</th>
+                                    <th width="19%">Problema Resuelto</th>
+                                    <th width="24%">Solución / Impacto</th>
+                                    <th width="25%">Flujo del Proceso (Canal)</th>
+                                    <th width="18%">Compromiso Futuro</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="td-highlight">Generador de Contratos</td>
+                                    <td>Riesgo legal y errores por llenado manual descentralizado.</td>
+                                    <td><strong style="color: var(--primary)">Automatización</strong> de documentos (Contrato, Pagaré) y control centralizado.</td>
+                                    <td class="flow-text">Form <span class="flow-arrow">&rarr;</span> Correo Op. <span class="flow-arrow">&rarr;</span> Inversionista <span class="flow-arrow">&rarr;</span> Sistema</td>
+                                    <td>Integración nativa en plataforma Tasatop.</td>
+                                </tr>
+                                <tr>
+                                    <td class="td-highlight">Simulador de Cronogramas</td>
+                                    <td>Fricción en negociación y saturación de aprobadores por excepciones constantes.</td>
+                                    <td><strong style="color: var(--primary)">Herramienta de simulación libre</strong> para gestores; agiliza negociación sin afectar el sistema.</td>
+                                    <td class="flow-text">Consulta Inv. <span class="flow-arrow">&rarr;</span> Simulación libre <span class="flow-arrow">&rarr;</span> Negociación <span class="flow-arrow">&rarr;</span> Cierre</td>
+                                    <td>Estandarizar su uso en todas las excepciones.</td>
+                                </tr>
+                                <tr>
+                                    <td class="td-highlight">Guía de Plataforma</td>
+                                    <td>Curva de aprendizaje lenta y consultas repetitivas tras capacitaciones.</td>
+                                    <td><strong style="color: var(--primary)">Manual autogestionable</strong> que sirve como refuerzo constante para el equipo B2C.</td>
+                                    <td class="flow-text">Nuevo Ingreso <span class="flow-arrow">&rarr;</span> Capacitación <span class="flow-arrow">&rarr;</span> Guía permanente</td>
+                                    <td>Mantener actualizada según cambios técnicos.</td>
+                                </tr>
+                                <tr>
+                                    <td class="td-highlight">Flujo de Tarifario (Excepciones)</td>
+                                    <td>Desorden en solicitudes de tasa/plazo y demora en la activación.</td>
+                                    <td><strong style="color: var(--primary)">Automatización de aprobaciones</strong> y generación de archivo listo para carga en sistema.</td>
+                                    <td class="flow-text">Form Comercial <span class="flow-arrow">&rarr;</span> Correo Aprob. <span class="flow-arrow">&rarr;</span> Respuesta <span class="flow-arrow">&rarr;</span> Carga</td>
+                                    <td>Reducir tiempos entre aprobación y ejecución.</td>
+                                </tr>
+                                <tr>
+                                    <td class="td-highlight">Ticketera Operaciones</td>
+                                    <td>Requerimientos dispersos por diversos canales y nula trazabilidad.</td>
+                                    <td><strong style="color: var(--primary)">Canal único de atención</strong> con estados de ticket </td>
+                                    <td class="flow-text">Form Requerimiento <span class="flow-arrow">&rarr;</span> Gestión Op. <span class="flow-arrow">&rarr;</span> Cambio Estado <span class="flow-arrow">&rarr;</span> Cierre</td>
+                                    <td>Consolidar métricas para mejora del servicio.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div> <!-- FIN TRACK -->
+
+        <!-- CONTROLES FLOTANTES -->
+        <div class="controls">
+            <button class="nav-btn" id="prevBtn"><i class="fa-solid fa-chevron-left"></i></button>
+            <div class="dots-container" id="dotsContainer">
+                <!-- Los dots se generarán vía JS -->
+            </div>
+            <button class="nav-btn" id="nextBtn"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+
+    </div> <!-- FIN WRAPPER -->
+
+    <!-- Lógica de Interactividad Nativa Pura -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const track = document.getElementById('track');
+            const slides = document.querySelectorAll('.slide');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const dotsContainer = document.getElementById('dotsContainer');
+            
+            let currentIndex = 0;
+            const totalSlides = slides.length;
+
+            // Generar dots dinámicamente
+            for (let i = 0; i < totalSlides; i++) {
+                const dot = document.createElement('div');
+                dot.classList.add('dot');
+                if (i === 0) dot.classList.add('active');
+                dot.addEventListener('click', () => goToSlide(i));
+                dotsContainer.appendChild(dot);
+            }
+            const dots = document.querySelectorAll('.dot');
+
+            // Función para actualizar la vista usando Viewport Width (vw)
+            // Esto asegura que avance EXACTAMENTE una pantalla completa, nunca mitades.
+            function updateSlider() {
+                track.style.transform = `translateX(-${currentIndex * 100}vw)`;
+                
+                // Actualizar botones
+                prevBtn.disabled = currentIndex === 0;
+                nextBtn.disabled = currentIndex === totalSlides - 1;
+                
+                // Actualizar dots
+                dots.forEach((dot, index) => {
+                    dot.classList.toggle('active', index === currentIndex);
+                });
+            }
+
+            // Función principal para cambiar slide
+            function goToSlide(index) {
+                if (index >= 0 && index < totalSlides) {
+                    currentIndex = index;
+                    updateSlider();
+                }
+            }
+
+            // Event Listeners Botones
+            nextBtn.addEventListener('click', () => goToSlide(currentIndex + 1));
+            prevBtn.addEventListener('click', () => goToSlide(currentIndex - 1));
+
+            // Event Listeners Teclado
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight') goToSlide(currentIndex + 1);
+                if (e.key === 'ArrowLeft') goToSlide(currentIndex - 1);
+            });
+            
+            // Inicializar
+            updateSlider();
+        });
+    </script>
+</body>
+</html>
